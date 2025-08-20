@@ -1,93 +1,94 @@
-# Vallejo-Bernal_Braun_etal_2025
+# Vallejo-Bernal & Braun et al. (2025)
+The PIKART catalog covers atmospheric rivers globally from 1940 to 2023 at 0.5° resolution and 6-hour temporal resolution.
+
+This repository contains all Python scripts that you need to reproduce the key results and figures from the paper it has been introduced with:
+
+**Vallejo-Bernal, S. M., Braun, T., Marwan, N., & Kurths, J. (2025)**  
+*PIKART: A Comprehensive Global Catalog of Atmospheric Rivers*  
+*Journal of Geophysical Research: Atmospheres*, **130**(15), e2024JD041869.
+DOI: **10.1029/2024JD041869** 
 
 
+This repository does **not** provide the scripts to generate the catalog itself. These can be found [here](https://gitlab.pik-potsdam.de/PIKART/pikart_v1).
 
-## Getting started
+## Quick Start
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. **Set up a Python environment**  
+All analyses were carried out in **Python 3.12.2**. The required packages are listed in *requirements.txt*.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+You can set up a Python environment:
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+```bash
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
 ```
-cd existing_repo
-git remote add origin https://gitlab.pik-potsdam.de/PIKART/vallejo-bernal_braun_etal_2025.git
-git branch -M main
-git push -uf origin main
+
+or a conda environment:
+
+```bash
+conda env create -f environment.yml
+conda activate pikart_env
 ```
 
-## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.pik-potsdam.de/PIKART/vallejo-bernal_braun_etal_2025/-/settings/integrations)
+2. **Download data**  
 
-## Collaborate with your team
+Download both the Lagrangian and Eulerian version of the PIKART catalog [here](http://ar.pik-potsdam.de/).
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Additional data that has been used in the manscrupt is listed here:
+| Dataset                 | Usage                                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `PIKART Eulerian & Lagrangian catalog`             | Required for all analyses and figures. Download [here](http://ar.pik-potsdam.de/). |
+| `ERA-5 IVT data`             | Required for creating the animation (and building the catalog). Download source data [here](https://cds.climate.copernicus.eu/). |
+| `ARconnect (Shearer et al., 2020)`             | Required for comparison in Fig. 7. Download [here](https://doi.org/10.6075/J0D21W00). |
+| `IPART-1 (Xu,Ma,& Chang, 2020)`             | Required for comparison in Fig. 7. Download [here](https://doi.org/10.5281/zenodo.3864592). |
+| `tARget-4 (Guan & Waliser, 2024)`             | Required for comparison in Fig. 7. Download [here](https://dataverse.ucla.edu/dataverse/ar). |
+| `shape-file for continents`             | Required for spatial maps and normalization in AR rank analysis. Provided in the world_continents directory.|
 
-## Test and Deploy
 
-Use the built-in continuous integration in GitLab.
+Place the required input files into the folders that you specify in the **config_PIKART.yml**-file. Alternatively, the paths can also be hard-coded into each analysis/plotting script individually. 
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+3. **Run analysis**  
 
-***
+All python scripts that produce results from the manuscript are stored in the *analysis* folder. Below, the scripts that implement the main analysis are listed:
 
-# Editing this README
+| Script                 | Purpose                                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `merge_csv_files.py`             | compiles a reduced version of the PIKART lagrangian catalog, containing the full period from 1940 to 2023, but only the variables necessary for the analysis presented in the manuscript. |
+| `analysis_figure7.py`     | Computes statistics for different catalogs as displayed in Fig. 7 (expecting adequate data input!).                           |
+| `analysis_figure8.py` | Computes spatial histograms as displayed in Fig. 8.                                 |
+| `analysis_figure9-10.py`       | Builds rank histograms displayed in Figs. 9 and 10 from chunked Eulerian catalog (parallelised, run on performant computer). |
+| `merge_figures9-10.py`       | Merges the longitudinal chunks and generates the input data for Figs. 9 and 10. |
+| `analysis_figure11.py`       | Performs lifecycle analysis and computes spatial histogram of inland penetrating ARs as displayed in Fig.11.                                      |
+| `analysis_figure12-1.py`       | Builds aggregated time series for trend analysis displayed in Fig.12 from chunked Eulerian catalog (parallelised, run on performant computer).                                      |
+| `analysis_figure12-2.py`       | Carries out the trend analysis displayed in Fig.12. |
+| `analysis_functions.py`             | Stores all subroutines needed in the other scripts. |
+| `submit_analysis_figures9-10.sh`             | Example bash script (Figs. 9/10), used to submit jobs to HPC. |
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
 
-## Suggestions for a good README
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+4. **Reproduce figures**  
 
-## Name
-Choose a self-explaining name for your project.
+All python scripts that plot results from the manuscript as main or supplementary figures are stored in the *figures* folder. They follow the same logic and build on the output data generated by the analyses scripts.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+![Figure 8](PIKART_Figure8.png)
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
 ## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+If you find any issues, please feel free to use the 'raise issue' function or [contact us](mailto:vallejo.bernal@pik-potsdam.de,tobraun@pik-potsdam.de,marwan@pik-potsdam.de) directly.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Further information
+More detailed information on the PIKART algorithm and the used AR identification and tracking algorithms can also be found on [our website](http://ar.pik-potsdam.de/).
 
 ## License
-For open source projects, say how it is licensed.
+The PIKART Atmospheric River Catalog is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0). You are free to share, use, and adapt the data for non-commercial purposes. Please give appropriate credit by citing the manuscript. Commercial use requires prior permission – please [contact us](mailto:vallejo.bernal@pik-potsdam.de,tobraun@pik-potsdam.de,marwan@pik-potsdam.de).
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Authors and acknowledgment
+The PIKART catalog was developed at the Potsdam Institute for Climate Impact Research (PIK) with contributions from various researchers and developers.
+
+We gratefully acknowledge support from the German Federal Ministry of Education and Research (BMBF) through the climXtreme project [01LP1902J], the Saxon State Ministry for Science, Culture and Tourism (SMWK) as part of the Breathing Nature initiative at Leipzig University [3‐7304/35/6‐2021/48880], and the European Space Agency (ESA) Living Planet Fellowship through the ARNETLAB project [4000144018/24/I-DT-lr].
+
+Special thanks to all contributors who have provided feedback, reported issues, and helped improve the dataset.
+
+

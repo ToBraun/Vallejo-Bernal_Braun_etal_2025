@@ -1,0 +1,155 @@
+# Copyright (C) 2025 by
+# Sara M. Vallejo-Bernal <vallejo.bernal@pik-potsdam.de>
+# All rights reserved.
+# GNU General Public License v3.0.
+
+# ----------------------------------------------------------------------------
+# FOLDERS AND FILES
+
+# Root folder to store ERA5 data downloaded from the Climate Data Central
+download_folder: '/p/projects/climxtreme/data/global/'
+
+# Folder where the zonal component of IVT, centered at 0°E, is stored
+ivtu_folder: '/p/projects/climxtreme/data/global/6hr/ivtu/'
+# Folder where the meridional component of IVT, centered at 0°E, is stored
+ivtv_folder: '/p/projects/climxtreme/data/global/6hr/ivtv/'
+# Folder where the magnitude of IVT, centered at 210°E, is stored
+ivt_shift_folder: '/p/projects/climxtreme/data/global/6hr/ivt_210E/'
+# Folder where the magnitude of IVT, centered at 0°E, is stored
+ivt_folder: '/p/projects/climxtreme/data/global/6hr/ivt/'
+# Folder where the world continents masks are stored
+wc_folder: '/p/projects/climxtreme/bernal/AR_catalogs/PIKART/world_continents/'
+
+# Folder where the outputs of the ARDT are stored
+output_folder: '/p/projects/climxtreme/bernal/AR_catalogs/PIKART/ARDT/output/0p5deg_6hr/'
+
+# Base name for the download, following the convention: 
+# %s_{dataset}_{spatialres}_{timeres}_%s_%s_{region}.%s
+download_base_name: '%s_ERA5_0p25deg_1hr_%s_%s_global.nc'
+# Base name of the pre-processed (i.e. input) IVT files, following the convention: 
+# %s_{dataset}_{spatialres}_{timeres}_%s_{region}.%s
+data_base_name: '%s_ERA5_0p5deg_6hr_%s_global.nc'
+# Base name of the putput files, following the convention: 
+# %s_{dataset}_{spatialres}_{timeres}_%s.%s
+output_base_name: '%s_ERA5_0p5deg_6hr_%s.%s'
+# File names of the continental masks
+wc_file: 'world_continents_3000sqkm.tif'
+wc_conti_file: 'world_continental_3000sqkm.tif'
+wc_insu_file: 'world_insular_3000sqkm.tif'
+ 
+# ----------------------------------------------------------------------------
+# IVT VARIABLES
+
+# Variable names in the netcdf files
+# Vertical integral of water vapour flux
+var : 'ivt'
+# Vertical integral of zonal water vapour flux
+u_var : 'ivtu'
+# Vertical integral of meridional water vapour flux
+v_var : 'ivtv'
+# Longitude
+lon_var: 'longitude'
+# Latitude
+lat_var: 'latitude'
+
+# ----------------------------------------------------------------------------
+# TEMPORAL DOMAIN
+
+# First year
+year_start: 1940  # inclusive
+
+# Last year
+year_end: 2023  # inclusive
+
+# ----------------------------------------------------------------------------
+# CALCULATION OF BACKGROUND AND ANOMALOUS IVT COMPONENTS
+
+# Top-Hat by Reconstruction kernel, specifying the shape of the synoptic-scale
+# neighborhood to decompose the IVT into a background and an anomalous component.
+# The kernel is the most important parameter as it defines the semiaxes of the 
+# neighborhood for AR detection.
+# A rule-of-thumb is that you should set the kernel size to be consistent with
+# the resolution of your data and the typical synoptic spatiotemporal scales of 
+# atmospheric river activity: 1000 km and 8 days.
+# Specify the kernel as a number of time steps/pixels 
+# kernel = [time_scale/2, spatial_scale/2, spatial_scale/2], according with the 
+# following formulas:
+# kernel[0] = (8 days * 24 hours / time_res_hours) / 2
+# kernel[1] = 1000 km / (110 km * spatial_res_lat) / 2
+# kernel[2] = 1000 km / (110 km * spatial_res_lon) / 2
+kernel: [16, 9, 9]  # For 0.5°x0.5° spatial and 6h temporal resolution
+
+# Percentile to calculate the synoptic-scale IVT marker image
+percentile: 87.5
+
+# Minimum proportion between the zonal (or meridional) IVT component and the 
+# IVT magnitude to place an edge between two geographical locations when 
+# extracting the AR axis.
+edge_eps: 0.4
+
+# ----------------------------------------------------------------------------
+# AR IDENTIFICATION POST-PROCESSING
+
+# AR shapes smaller than this area are discarded.
+min_area: 500000   # km²
+# AR shapes larger than this area are discarded.
+max_area_hard: 18000000
+# AR shapes larger than this area are flagged as relaxed.
+max_area: 10000000   # km²
+
+# AR shapes shorter than this length are discarded.
+min_length_hard: 1500   # km
+# AR shapes shorter than this length are flagged as relaxed.
+min_length: 2000   # km
+# AR shapes longer than this length are flagged as relaxed.
+max_length: 11000   # km
+
+# AR shapes with a length-to-width ratio lower than this value are discarded.
+min_lw: 2
+
+# AR shapes with an iso-perimetric quotient higher than this value are flagged as relaxed.
+max_isop: 0.5
+# AR shapes with an iso-perimetric quotient higher than this value are discarded.
+max_isop_hard: 0.7
+
+# Grid cells with a local IVT direction differing from the mean IVT direction by 
+# more than this angle are considered misaligned.
+misalignment_angle: 45
+# AR shapes with a fraction of misaligned grid cells greater than this value are
+# flagged as relaxed.
+misalignment_frac: 0.5
+
+# ----------------------------------------------------------------------------
+# AR TRACKING
+
+# Maximum temporal gap allowed to append an AR shape to an overlapping AR 
+# trajectory. We allow AR trajectories to be interrupted for one time step, 
+# so that the temporal gap is equal to 2*time_res.
+time_gap_allow: 12   # h
+
+# ----------------------------------------------------------------------------
+# AR TRACKING POST-PROCESSING
+
+# AR trajectories lasting less that this duration are discarded.
+min_dur: 12   # h
+
+# Maximum 1-hour displacement for the centroid to be considered as moving typically.
+max_disp: 120   # km
+# AR trajectories with centroid speed lower than this value are discarded.
+min_speed: 9   # km/h
+# AR trajectories with centroid speed higher than this value are discarded.
+max_speed: 90   # km/h
+
+# AR trajectories with a fraction of relaxed AR shapes higher than this value are discarded.
+max_relax: 0.75
+
+# ----------------------------------------------------------------------------
+# AR CLASSIFICATION
+
+# Minimum percentage of area over water bodies at the first time step for an AR 
+# trajectory to be considered of oceanic origin.
+init_ocean_frac: 50   # %
+
+# Minimum percentage of area over continental landmasses for an AR trajectory to be 
+# evaluated for inland penetration.
+ip_thres: 30   # %
