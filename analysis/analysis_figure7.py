@@ -13,7 +13,7 @@ Run this script from the command line with:
     python analysis_figure7.py
 '''
 
-# %% MODULES
+# %% MODULES:
  
 # Standard library imports
 import numpy as np
